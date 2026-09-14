@@ -6,6 +6,9 @@ import { AnnouncementBar } from "@/components/AnnouncementBar";
 import { Logo } from "@/components/Logo";
 import { Poster } from "@/components/Poster";
 import { Icon } from "@/components/ui";
+import { PromptDemo } from "@/components/landing/PromptDemo";
+import { TabbedPresets } from "@/components/landing/TabbedPresets";
+import { InteractiveWall, ProjectCard } from "@/components/landing/InteractiveWall";
 
 /**
  * Landing page.
@@ -184,59 +187,46 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* --------------------------------------------- hero feature panel */}
-        <section className="relative mt-4 overflow-hidden rounded-[18px] border border-ink-100/8 bg-ink-900 px-6 py-16 text-center sm:py-24">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 opacity-[0.18]"
-            style={{
-              backgroundImage:
-                "linear-gradient(rgba(211,252,63,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(211,252,63,.5) 1px, transparent 1px)",
-              backgroundSize: "56px 56px",
-              maskImage: "radial-gradient(70% 60% at 50% 50%, black, transparent)",
-            }}
+        {/* Playable demo of the core loop, in place of a static pitch panel. */}
+        <PromptDemo />
+
+        {/* ---------------------------------------------- repeating walls */}
+        <section className="mt-12">
+          <SectionHead
+            label="Visual effects"
+            cta={{ label: "View all presets", href: "/effects" }}
           />
-          <div className="relative">
-            <p className="text-[13px] text-ink-400">Higgsfield generator with</p>
-            <h2 className="headline mx-auto mt-2 text-5xl sm:text-7xl">
-              Camera <span className="text-acid">Control</span>
-            </h2>
-            <p className="mx-auto mt-4 max-w-lg text-[14px] text-ink-300">
-              Describe the subject. Press a button for the shot. The model is told exactly
-              what the camera does — and you can see it.
-            </p>
-            <div className="mt-7 flex flex-wrap items-center justify-center gap-2.5">
-              <Link
-                href="/generate"
-                className="inline-flex h-11 items-center gap-2 rounded-full bg-acid px-6 text-[14px] font-semibold text-ink-950 transition-all hover:brightness-110"
-              >
-                <Icon name="wand" className="h-4 w-4" />
-                Start generating
-              </Link>
-              <Link
-                href="/effects"
-                className="inline-flex h-11 items-center rounded-full border border-ink-600 px-6 text-[14px] font-medium transition-colors hover:border-ink-400"
-              >
-                Explore presets
-              </Link>
-            </div>
+          <div className="mt-5">
+            <TabbedPresets
+              presets={EFFECTS}
+              param="effect"
+            />
           </div>
         </section>
 
-        {/* ---------------------------------------------- repeating walls */}
-        <WallSection
-          label="Visual effects"
-          cta={{ label: "View all presets", href: "/effects" }}
-          tiles={EFFECTS.slice(0, 24).map((e) => e.id)}
-        />
-
-        <CardSection
-          badge="Signature"
-          title="Higgsfield Camera Moves"
-          blurb={`${CAMERA_MOVES.length} moves across push, orbit, crane, pan, rig and lens — every one of them a single click, and every one of them visible in the prompt that gets sent.`}
-          cta={{ label: "View all moves", href: "/effects" }}
-          tiles={CAMERA_MOVES.slice(0, 24).map((m) => m.id)}
-        />
+        <section className="mt-12 overflow-hidden rounded-[18px] border border-ink-100/8 bg-ink-900 p-5 sm:p-7">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-acid px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-ink-950">
+            <Icon name="camera" className="h-3 w-3" />
+            Signature
+          </span>
+          <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 className="headline text-3xl text-acid sm:text-4xl">
+                Higgsfield Camera Moves
+              </h2>
+              <p className="mt-2.5 max-w-xl text-[13px] leading-relaxed text-ink-300">
+                {CAMERA_MOVES.length} moves across push, orbit, crane, pan, rig and lens.
+                Filter by how the camera behaves, then send one straight to the generator.
+              </p>
+            </div>
+          </div>
+          <div className="mt-6">
+            <TabbedPresets
+              presets={CAMERA_MOVES}
+              param="camera"
+            />
+          </div>
+        </section>
 
         <WallSection
           label="Seedance 2.5"
@@ -252,21 +242,12 @@ export default function Landing() {
           />
           <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
             {COMMUNITY.slice(0, 12).map((item) => (
-              <div
+              <ProjectCard
                 key={item.id}
-                className="overflow-hidden rounded-[12px] border border-ink-100/8 bg-ink-850"
-              >
-                <Poster seed={item.seed} aspectId="16:9" sizes={420} />
-                <div className="flex items-center gap-1.5 px-2.5 py-2">
-                  <Logo className="h-3.5 w-3.5 shrink-0" />
-                  <span className="min-w-0 flex-1 truncate text-[11px] font-medium">
-                    @{item.author}
-                  </span>
-                  <span className="shrink-0 rounded-full bg-ink-800 px-1.5 py-0.5 text-[9px] text-ink-400">
-                    Public
-                  </span>
-                </div>
-              </div>
+                seed={item.seed}
+                author={item.author}
+                prompt={item.prompt}
+              />
             ))}
           </div>
         </section>
@@ -381,25 +362,6 @@ function SectionHead({
   );
 }
 
-/**
- * Dense media wall. CSS columns rather than a grid with row spans: the tiles mix
- * portrait and square, and a spanning grid leaves empty cells wherever the spans
- * do not divide evenly.
- */
-function Wall({ tiles }: { tiles: string[] }) {
-  return (
-    <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 lg:grid-cols-6">
-      {tiles.map((seed) => (
-        <div
-          key={seed}
-          className="overflow-hidden rounded-[10px] border border-ink-100/8"
-        >
-          <Poster seed={seed} aspectId="1:1" sizes={320} />
-        </div>
-      ))}
-    </div>
-  );
-}
 
 function WallSection({
   label,
@@ -414,51 +376,12 @@ function WallSection({
     <section className="mt-12">
       <SectionHead label={label} cta={cta} />
       <div className="mt-5">
-        <Wall tiles={tiles} />
+        <InteractiveWall tiles={tiles} label={label} href={cta.href} />
       </div>
     </section>
   );
 }
 
-/** A wall wrapped in a dark card with a lime badge and a description. */
-function CardSection({
-  badge,
-  title,
-  blurb,
-  cta,
-  tiles,
-}: {
-  badge: string;
-  title: string;
-  blurb: string;
-  cta: { label: string; href: string };
-  tiles: string[];
-}) {
-  return (
-    <section className="mt-12 overflow-hidden rounded-[18px] border border-ink-100/8 bg-ink-900 p-5 sm:p-7">
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-acid px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-ink-950">
-        <Icon name="camera" className="h-3 w-3" />
-        {badge}
-      </span>
-      <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 className="headline text-3xl text-acid sm:text-4xl">{title}</h2>
-          <p className="mt-2.5 max-w-xl text-[13px] leading-relaxed text-ink-300">{blurb}</p>
-        </div>
-        <Link
-          href={cta.href}
-          className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-acid px-4 text-[12px] font-semibold text-ink-950 transition-all hover:brightness-110"
-        >
-          {cta.label}
-          <Icon name="arrow-up-right" className="h-3 w-3" />
-        </Link>
-      </div>
-      <div className="mt-6">
-        <Wall tiles={tiles} />
-      </div>
-    </section>
-  );
-}
 
 function SiteHeader() {
   const left = [
