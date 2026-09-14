@@ -1,0 +1,18 @@
+node_modules/
+.next/
+out/
+build/
+dist/
+
+.env
+.env*.local
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+
+# Agent capture: the logs themselves ship publicly and are NOT ignored.
+# Only the hook's internal bookkeeping is.
+.agent-logs/.state/
+
+.vercel

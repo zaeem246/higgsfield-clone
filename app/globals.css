@@ -1,0 +1,144 @@
+@import "tailwindcss";
+
+/**
+ * Cinematic dark system.
+ *
+ * The product is a wall of moving images, so the interface stays out of the
+ * way: near-black ground, a narrow set of greys for structure, and exactly one
+ * chromatic accent (acid lime) reserved for credits, primary actions and live
+ * state. Colour in the UI means "this is yours" or "act here" — everything else
+ * chromatic on screen is the user's own media.
+ */
+
+@theme {
+  --color-ink-950: #07070a;
+  --color-ink-900: #0b0b0f;
+  --color-ink-850: #101015;
+  --color-ink-800: #16161c;
+  --color-ink-750: #1c1c24;
+  --color-ink-700: #24242e;
+  --color-ink-600: #34343f;
+  --color-ink-500: #4a4a57;
+  --color-ink-400: #6b6b7a;
+  --color-ink-300: #93939f;
+  --color-ink-200: #bcbcc6;
+  --color-ink-100: #e4e4ea;
+
+  /* Signature acid lime, taken from the live product. Reserved for credits,
+     primary actions and live state. */
+  --color-acid: #d3fc3f;
+  --color-acid-deep: #a5c91f;
+  /* Secondary badge accent, for "TOP"-style flags. */
+  --color-hot: #ff6ec7;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --radius-xs: 6px;
+  --radius-card: 14px;
+}
+
+html {
+  color-scheme: dark;
+  background: var(--color-ink-950);
+}
+
+body {
+  background: var(--color-ink-950);
+  color: var(--color-ink-100);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Tight, slightly negative tracking on display type — editorial, not techy. */
+.display {
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+}
+
+/* Hairline that reads at 1px on any DPR without going muddy. */
+.hairline {
+  border-color: color-mix(in oklab, var(--color-ink-100) 9%, transparent);
+}
+
+.surface {
+  background: var(--color-ink-850);
+  border: 1px solid color-mix(in oklab, var(--color-ink-100) 8%, transparent);
+}
+
+/* Film grain over poster art, so flat gradients read as photographic. */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.16;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Scrollbars: present but quiet. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ink-700) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-ink-700);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink-600);
+  background-clip: content-box;
+}
+
+@keyframes sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+/* Light sweeping across a tile while it renders. */
+.sweep::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    color-mix(in oklab, white 22%, transparent) 50%,
+    transparent 80%
+  );
+  animation: sweep 1.9s ease-in-out infinite;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.rise {
+  animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+.pulse-dot {
+  animation: pulse-dot 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sweep::before,
+  .rise,
+  .pulse-dot {
+    animation: none;
+  }
+  .rise {
+    opacity: 1;
+    transform: none;
+  }
+}
