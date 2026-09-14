@@ -184,6 +184,36 @@ model: claude-opus-5
 Test 3 captured — no changes made.
 ```
 
+## Note on the main session log
+
+The hook stores prompts verbatim, and the canaries above are raw. The one
+exception is this build's own session log
+(`2026-09-14_09-35-49_879e1b52-....md`): its prompts were copy-edited for
+readability after the fact, on request, during what was a practice run. The
+assignment brief inside exchange 1 is untouched, and the unedited original is
+kept outside the repo. Flagged here rather than left implicit, because the
+mechanism's whole value is that the record is trustworthy.
+
+## Defects found in the hook itself
+
+Two bugs surfaced later in the build, both found by reading the logs back rather
+than by the hook reporting anything — which is the point worth keeping: a capture
+hook that fails does so silently.
+
+1. **Prompts carrying an attachment were dropped.** A message whose text arrived
+   alongside a screenshot reached `UserPromptSubmit` with an empty `prompt`
+   field. The exchange counter still advanced, so the log gained an entry header
+   with nothing beneath it, and one prompt vanished entirely. Guarded now: an
+   entry is never written for an empty prompt.
+
+2. **Entries could run together.** One response body reached the file without its
+   trailing newlines, so the next entry's header was glued to the end of it and
+   no parser could read the pair apart. `append()` now normalises the join
+   before writing.
+
+A structural check over every log in `.agent-logs/` — headers preceded by a blank
+line, no empty bodies, prompts and responses paired — passes for all files.
+
 ## Known limitation
 
 `model:` on the PROMPT line reads `unknown` for the first exchange of a session: at

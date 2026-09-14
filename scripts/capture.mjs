@@ -87,6 +87,9 @@ function onPrompt(payload) {
   // A turn woken by a background task carries no human prompt; logging it would
   // record an exchange the user never had.
   if (!stripMachineBlocks(prompt)) return;
+  // A prompt that carries only an attachment arrives with no text, and used to
+  // land as an entry header with an empty body underneath.
+  if (!prompt.trim()) return;
 
   const state = loadState(payload.session_id);
   const now = new Date().toISOString();
@@ -358,6 +361,9 @@ function append(state, text) {
   let body = "";
   if (fs.existsSync(file)) {
     body = stripHeader(fs.readFileSync(file, "utf8"));
+    // Normalise the join so a body that lost its trailing newlines cannot run
+    // straight into the next entry's header.
+    if (body) body = body.replace(/\s*$/, "\n\n");
   }
   fs.writeFileSync(file, frontmatter(state) + body + text, "utf8");
 }

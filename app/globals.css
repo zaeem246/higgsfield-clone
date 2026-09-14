@@ -56,6 +56,18 @@ body {
   line-height: 0.95;
 }
 
+/* Section headings on the original are set in a heavy condensed face, all caps.
+   Geist has no condensed cut, so this approximates it: maximum weight, tight
+   tracking, and a slight horizontal compression. */
+.headline {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 0.94;
+  transform: scaleX(0.94);
+  transform-origin: left center;
+}
+
 /* Hairline that reads at 1px on any DPR without going muddy. */
 .hairline {
   border-color: color-mix(in oklab, var(--color-ink-100) 9%, transparent);

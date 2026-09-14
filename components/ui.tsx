@@ -210,6 +210,12 @@ const PATHS: Record<string, ReactNode> = {
   ),
   plus: <path d="M12 5v14M5 12h14" />,
   minus: <path d="M5 12h14" />,
+  "arrow-up-right": (
+    <>
+      <path d="M7 17L17 7" />
+      <path d="M8 7h9v9" />
+    </>
+  ),
   "sound-on": (
     <>
       <path d="M4 9v6h4l5 4V5L8 9z" />
