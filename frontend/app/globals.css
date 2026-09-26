@@ -1,0 +1,747 @@
+@import "tailwindcss";
+/* The 28 camera moves. Kept beside this file rather than in it: the keyframes
+   are a body of work in their own right, and lib/camera-moves.ts is their
+   index. */
+@import "./camera-moves.css";
+
+/**
+ * Kinograde — a warm dark room, not a blue void.
+ *
+ * Dark is the default and the register the product is designed in: the ground
+ * is the warm near-black of a grading suite. A warm paper mode exists as the
+ * considered alternate. Neither theme has a blue cast, and one accent —
+ * vermilion, the colour of a grease pencil — marks the current shot, the spend
+ * and the primary action. Every other chromatic pixel belongs to the user's
+ * own media.
+ */
+
+/* Theme is driven by a cookie-set attribute rather than the media query, so the
+   server renders the same tree the client hydrates and there is no flash. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root {
+  /* Dark — the default. Warm near-black, never blue-black. */
+  --paper: #14120e;
+  --raised: #1c1915;
+  --sunk: #0e0c09;
+  --ink: #f2ede3;
+  --graphite: #8a8377; /* 5.04:1 on the ground, 4.66:1 on a panel. */
+  --rule: #2e2920;
+  --vermilion: #e85a2a; /* 5.34:1 on the ground. */
+  --vermilion-ink: #14120e; /* 5.34:1 on vermilion; white would be 3.5:1. */
+  --shadow-plate: 0 1px 2px rgb(0 0 0 / 0.55), 0 14px 30px -20px rgb(0 0 0 / 0.85);
+  --sweep-tint: 255 255 255;
+}
+
+[data-theme="light"] {
+  /* Warm paper, never a cold grey-white. */
+  --paper: #f6f3ec;
+  --raised: #fffdf8;
+  --sunk: #ebe7dc;
+  --ink: #17140f;
+  --graphite: #635d52; /* 6.2:1 on paper. */
+  --rule: #d6cfc1;
+  --vermilion: #b83e17; /* 5.07:1 on paper, 5.6:1 behind white. */
+  --vermilion-ink: #fffdf8;
+  --shadow-plate: 0 1px 2px rgb(23 20 15 / 0.07), 0 12px 28px -18px rgb(23 20 15 / 0.35);
+  --sweep-tint: 23 20 15;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-raised: var(--raised);
+  --color-sunk: var(--sunk);
+  --color-ink: var(--ink);
+  --color-graphite: var(--graphite);
+  --color-rule: var(--rule);
+  --color-vermilion: var(--vermilion);
+  --color-vermilion-ink: var(--vermilion-ink);
+
+  --font-display: var(--font-instrument-serif), ui-serif, Georgia, serif;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+
+  --radius-plate: 2px;
+
+  --ease-out-quint: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.5, 1);
+}
+
+@layer base {
+  html {
+    background: var(--paper);
+    /* Keeps form controls, scrollbars and caret in the right register. */
+    color-scheme: dark;
+  }
+
+  [data-theme="light"] {
+    color-scheme: light;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    /* Numerals are tabular everywhere — costs, credits and frame numbers all
+       sit on the same vertical rhythm as they change. */
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--vermilion);
+    outline-offset: 2px;
+    border-radius: 1px;
+  }
+
+  ::selection {
+    background: var(--vermilion);
+    color: var(--vermilion-ink);
+  }
+
+  input,
+  textarea,
+  select,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  textarea {
+    field-sizing: content;
+  }
+
+  /* The scrollbar is part of the room. */
+  * {
+    scrollbar-color: var(--rule) transparent;
+  }
+}
+
+@layer components {
+  /* --- Editorial type ------------------------------------------------- */
+
+  .display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    line-height: 0.92;
+    letter-spacing: -0.021em;
+  }
+
+  /* Small caps label used on every section and field. The grid is the
+     aesthetic, and these are its captions. */
+  .label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    line-height: 1.1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--graphite);
+  }
+
+  /* Printed metadata: on screen in small mono, never behind a hover. */
+  .meta {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    line-height: 1.45;
+    letter-spacing: 0.02em;
+    color: var(--graphite);
+  }
+
+  /* --- Structure ------------------------------------------------------- */
+
+  .shell {
+    width: 100%;
+    max-width: 80rem;
+    margin-inline: auto;
+    padding-inline: 1.125rem;
+  }
+
+  @media (min-width: 768px) {
+    .shell {
+      padding-inline: 2rem;
+    }
+  }
+
+  /* One vertical rhythm for every band on a page. Tight on purpose: this is a
+     professional tool, and a screen has to earn its scroll. */
+  .band {
+    padding-block: 2.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .band {
+      padding-block: 3.25rem;
+    }
+  }
+
+  .band-tight {
+    padding-block: 1.75rem;
+  }
+
+  @media (min-width: 768px) {
+    .band-tight {
+      padding-block: 2.25rem;
+    }
+  }
+
+  /* --- Motion ---------------------------------------------------------- */
+
+  /* Entrance: a 10px rise with a hairline of settle, staggered by --i × 40ms,
+     run once by the observer that adds .is-in. Elements start hidden only when
+     JS is present, so a no-JS/crawler render still shows everything. */
+  .reveal {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+    transition:
+      opacity 0.52s var(--ease-out-quint),
+      transform 0.52s var(--ease-out-quint);
+    transition-delay: calc(var(--i, 0) * 40ms);
+    will-change: opacity, transform;
+  }
+
+  .reveal.is-in {
+    opacity: 1;
+    transform: none;
+    will-change: auto;
+  }
+
+  /* The render sweep: a bar of light crossing the frame while the shot is
+     queued or rendering. A state, not a spinner.
+
+     The bar is a narrow element that *translates*, rather than a full-bleed
+     gradient whose background-position moves: background-position repaints the
+     layer on every frame, and there can be a dozen of these on a contact
+     sheet at once. A transform stays on the compositor. */
+  .sweep::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 55%;
+    pointer-events: none;
+    background: linear-gradient(
+      100deg,
+      transparent 0%,
+      rgb(var(--sweep-tint) / 0.05) 30%,
+      rgb(var(--sweep-tint) / 0.16) 50%,
+      rgb(var(--sweep-tint) / 0.05) 70%,
+      transparent 100%
+    );
+    animation: sweep 1.5s var(--ease-out-quint) infinite;
+  }
+
+  @keyframes sweep {
+    from {
+      transform: translate3d(-110%, 0, 0);
+    }
+    to {
+      transform: translate3d(292%, 0, 0);
+    }
+  }
+
+  /* The lifecycle bar under a pending frame: fills while queued, runs while
+     rendering, snaps full on ready. */
+  .stage-bar {
+    position: relative;
+    overflow: hidden;
+    background: var(--rule);
+  }
+
+  .stage-bar > i {
+    display: block;
+    height: 100%;
+    background: var(--vermilion);
+    transform-origin: left center;
+    transition: transform 0.6s var(--ease-out-quint);
+  }
+
+  /* Queued is not "nothing is happening" — it is a place in a line, so the bar
+     creeps rather than sits. Rendering is the same bar working much harder. */
+  .stage-bar[data-stage="queued"] > i {
+    animation: stage-creep 2.8s var(--ease-out-quint) infinite;
+  }
+
+  @keyframes stage-creep {
+    0%,
+    100% {
+      transform: scaleX(0.05);
+      opacity: 0.55;
+    }
+    70% {
+      transform: scaleX(0.24);
+      opacity: 0.95;
+    }
+  }
+
+  .stage-bar[data-stage="rendering"] > i {
+    animation: stage-run 1.4s var(--ease-out-quint) infinite;
+  }
+
+  @keyframes stage-run {
+    0% {
+      transform: scaleX(0.2);
+      opacity: 0.7;
+    }
+    50% {
+      transform: scaleX(0.72);
+      opacity: 1;
+    }
+    100% {
+      transform: scaleX(0.2);
+      opacity: 0.7;
+    }
+  }
+
+  /* The stage currently reached pulses just enough to read as live. */
+  .stage-live {
+    animation: stage-pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes stage-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.45;
+    }
+  }
+
+  /* A preset fragment landing in the composed prompt. */
+  .land {
+    animation: land 0.38s var(--ease-out-quint);
+    border-radius: 2px;
+  }
+
+  @keyframes land {
+    0% {
+      opacity: 0;
+      transform: translateY(-5px);
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--vermilion) 30%, transparent);
+      background: color-mix(in oklab, var(--vermilion) 30%, transparent);
+    }
+    60% {
+      opacity: 1;
+      transform: none;
+    }
+    100% {
+      opacity: 1;
+      transform: none;
+      box-shadow: 0 0 0 3px transparent;
+      background: transparent;
+    }
+  }
+
+  /* Springy hover, ≤1.03, and a 1px depress on press. */
+  .springy {
+    transition:
+      transform 0.15s var(--ease-spring),
+      background-color 0.15s var(--ease-out-quint),
+      border-color 0.15s var(--ease-out-quint),
+      box-shadow 0.15s var(--ease-out-quint),
+      color 0.15s var(--ease-out-quint);
+  }
+
+  .springy:hover:not(:disabled) {
+    transform: scale(1.02);
+  }
+
+  .springy:active:not(:disabled) {
+    transform: translateY(1px) scale(1);
+  }
+
+  /* A preset chip. Selecting one should feel like a stamp landing: it depresses
+     under the finger and settles with a short overshoot. */
+  .chip {
+    transition:
+      transform 0.16s var(--ease-spring),
+      background-color 0.14s var(--ease-out-quint),
+      border-color 0.14s var(--ease-out-quint),
+      color 0.14s var(--ease-out-quint);
+  }
+
+  .chip:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  .chip:active:not(:disabled) {
+    transform: translateY(1px) scale(0.97);
+  }
+
+  .chip[aria-pressed="true"] {
+    animation: stamp 0.3s var(--ease-spring);
+  }
+
+  @keyframes stamp {
+    0% {
+      transform: scale(0.9);
+    }
+    55% {
+      transform: scale(1.045);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  /* The spend figure flicks when it recalculates, so the cause is visible. */
+  .tick {
+    animation: tick 0.3s var(--ease-out-quint);
+  }
+
+  @keyframes tick {
+    from {
+      color: var(--vermilion);
+    }
+    to {
+      color: inherit;
+    }
+  }
+
+  /* --- The plate ------------------------------------------------------- */
+
+  /* Media tiles sit on the ground as photographic plates. `isolation` keeps the
+     light rigs' `mix-blend-mode` inside the frame instead of blending with the
+     page behind it. */
+  .plate {
+    position: relative;
+    overflow: hidden;
+    background: var(--sunk);
+    box-shadow: var(--shadow-plate);
+    isolation: isolate;
+  }
+
+  /* The grade itself, on its own layer so the camera move can push, roll and
+     rack it inside a frame that never moves — which is what a camera move
+     actually is. The plate carries the grade's own darkest tone behind it, so
+     even a mis-measured excursion shows film rather than furniture. */
+  .plate-image {
+    position: absolute;
+    inset: 0;
+    transform-origin: 50% 50%;
+    backface-visibility: hidden;
+    transition: filter 0.85s var(--ease-out-quint);
+  }
+
+  /* At rest the plate breathes: the key drifts across the frame and the grain
+     crawls with it, over roughly twenty seconds. Phase and period both come
+     from the seed (see plateBreath in lib/plate.ts), so a wall of twenty
+     plates never pulses in unison. It is atmosphere; if you can see it
+     happening it is wrong.
+
+     Transform only, and deliberately so. An earlier cut drifted the exposure
+     with `filter: brightness()` as well; measured against ten full-width
+     lookbook plates that cost two thirds of the frame budget — 37fps against
+     60 — because a filter on an element this large is re-applied every frame
+     while a transform is not. The scale and the micro-rotation move the key
+     and the grain on their own, which is what the drift was for. */
+  .plate-image[data-breathe="on"] {
+    animation: plate-breathe var(--breathe-dur, 19s) ease-in-out var(--breathe-delay, 0s) infinite;
+  }
+
+  @keyframes plate-breathe {
+    0% {
+      transform: scale(1);
+    }
+    34% {
+      transform: scale(1.018) rotate(0.11deg) translate3d(0.16%, -0.1%, 0);
+    }
+    68% {
+      transform: scale(1.014) rotate(-0.09deg) translate3d(-0.12%, 0.12%, 0);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  /* Playing a camera move replaces the breath outright. The keyframe name, the
+     duration and the easing all arrive as custom properties from
+     lib/camera-moves.ts, so this is the only rule the 28 moves need. */
+  .plate-image[data-cam="on"] {
+    animation: var(--cam-anim) var(--cam-dur) var(--cam-ease) var(--cam-iter, 1) both;
+  }
+
+  /* Off-screen plates cost nothing. An IntersectionObserver flips the flag on
+     the frame; everything inside it — breath, move, sweep, light rig — parks
+     where it stands and resumes on the way back. */
+  .plate[data-onscreen="false"] *,
+  .plate[data-onscreen="false"]::after {
+    animation-play-state: paused !important;
+  }
+
+  /* --- The light rigs that ride with a move ---------------------------- */
+
+  .plate-optic {
+    position: absolute;
+    pointer-events: none;
+    opacity: 0;
+    animation: var(--sheen-anim) var(--cam-dur) var(--cam-ease) var(--cam-iter, 1) both;
+  }
+
+  /* A key light crossing the frame: orbit, arc, lazy susan, glam. */
+  .plate-optic[data-optic="bar"] {
+    inset: -30% -55%;
+    mix-blend-mode: screen;
+    background: linear-gradient(
+      100deg,
+      transparent 0%,
+      rgb(255 248 236 / 0.04) 40%,
+      rgb(255 248 236 / 0.5) 50%,
+      rgb(255 248 236 / 0.04) 60%,
+      transparent 100%
+    );
+  }
+
+  /* The same key, but turning against the frame rather than across it. */
+  .plate-optic[data-optic="counter"] {
+    inset: -40%;
+    mix-blend-mode: screen;
+    background: radial-gradient(
+      40% 56% at 20% 32%,
+      rgb(255 246 230 / 0.52) 0%,
+      rgb(255 246 230 / 0.14) 46%,
+      transparent 70%
+    );
+  }
+
+  /* The near plane of a rack focus: a foreground that is soft when the far
+     plane is sharp, and sharp when the far plane is not. */
+  .plate-optic[data-optic="rack"] {
+    inset: 54% 0 0 0;
+    background: linear-gradient(
+      to top,
+      rgb(4 3 2 / 0.82) 0%,
+      rgb(4 3 2 / 0.6) 42%,
+      rgb(4 3 2 / 0.22) 80%,
+      transparent 100%
+    );
+  }
+
+  /* Bullet time's flare, cracking on at the instant the rig moves. */
+  .plate-optic[data-optic="flare"] {
+    inset: 4% 6%;
+    mix-blend-mode: screen;
+    background:
+      radial-gradient(
+        62% 3% at 50% 46%,
+        rgb(236 246 255 / 0.95) 0%,
+        rgb(190 220 255 / 0.36) 42%,
+        transparent 78%
+      ),
+      radial-gradient(
+        3% 58% at 50% 46%,
+        rgb(236 246 255 / 0.7) 0%,
+        rgb(190 220 255 / 0.22) 42%,
+        transparent 78%
+      );
+  }
+
+  /* The vertigo's walls. It closes in while the grade expands, which is the
+     half of a dolly zoom a flat plane cannot perform on its own. */
+  .plate-optic[data-optic="vertigo"] {
+    /* Three times the frame in each direction, so that however far in it
+       closes the element still covers the plate and only its soft ramp is
+       ever seen — never its edge. */
+    inset: -100%;
+    background: radial-gradient(
+      closest-side,
+      transparent 23%,
+      rgb(4 3 2 / 0.5) 33%,
+      rgb(4 3 2 / 0.94) 42%,
+      rgb(4 3 2 / 0.94) 100%
+    );
+  }
+
+  /* The fisheye's front element: the corners are simply not in the picture. */
+  .plate-lens {
+    position: absolute;
+    inset: -7%;
+    border-radius: 50%;
+    pointer-events: none;
+    box-shadow:
+      0 0 0 60rem rgb(6 5 4 / 0.72),
+      inset 0 0 3rem rgb(6 5 4 / 0.55);
+  }
+
+  /* --- The render lifecycle, on the plate itself ----------------------- */
+
+  /* A shot that has not rendered is not a finished picture with a bar under
+     it: it is latent. Queued is barely there, rendering is resolving, and
+     ready develops up — so the arrival lands rather than pops. */
+  .plate[data-phase="queued"] .plate-image {
+    filter: saturate(0.14) brightness(0.58) contrast(0.9) blur(4.5px);
+  }
+
+  .plate[data-phase="rendering"] .plate-image {
+    filter: saturate(0.55) brightness(0.84) blur(1.8px);
+  }
+
+  .plate[data-phase="develop"] .plate-image {
+    animation: plate-develop 0.95s var(--ease-out-quint) both;
+  }
+
+  @keyframes plate-develop {
+    0% {
+      transform: scale(1.035);
+      filter: saturate(0.2) brightness(0.6) contrast(0.9) blur(5px);
+    }
+    58% {
+      transform: scale(1.005);
+      filter: saturate(1.1) brightness(1.04) contrast(1.02) blur(0);
+    }
+    100% {
+      transform: scale(1);
+      filter: none;
+    }
+  }
+
+  /* One hairline of vermilion around the frame as the plate lands, then gone. */
+  .plate-arrive {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    box-shadow: inset 0 0 0 1px var(--vermilion);
+    animation: plate-arrive 0.95s var(--ease-out-quint) both;
+  }
+
+  @keyframes plate-arrive {
+    0% {
+      opacity: 0;
+      transform: scale(1.025);
+    }
+    24% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1);
+    }
+  }
+
+  /* A plate you can pick up. Used where hovering also plays the move. */
+  .plate-lift {
+    transition:
+      transform 0.26s var(--ease-spring),
+      box-shadow 0.26s var(--ease-out-quint);
+  }
+
+  .plate-lift:hover,
+  .plate-lift:focus-visible,
+  .plate-lift:focus-within {
+    transform: translate3d(0, -4px, 0);
+    box-shadow:
+      0 2px 4px rgb(0 0 0 / 0.5),
+      0 24px 46px -24px rgb(0 0 0 / 0.9);
+  }
+}
+
+/* View Transitions: a short cross-fade with a hair of rise, so a route change
+   reads as a page turn rather than a repaint. */
+::view-transition-old(root) {
+  animation: page-out 0.18s var(--ease-out-quint) both;
+}
+
+::view-transition-new(root) {
+  animation: page-in 0.28s var(--ease-out-quint) both;
+}
+
+@keyframes page-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* Everything above collapses to instant. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.001ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  .springy:hover:not(:disabled),
+  .springy:active:not(:disabled),
+  .chip:hover:not(:disabled),
+  .chip:active:not(:disabled) {
+    transform: none;
+  }
+
+  .sweep::after {
+    animation: none;
+    background: rgb(var(--sweep-tint) / 0.07);
+  }
+
+  .stage-bar[data-stage="queued"] > i {
+    animation: none;
+    transform: scaleX(0.18);
+  }
+
+  .stage-bar[data-stage="rendering"] > i {
+    animation: none;
+    transform: scaleX(0.6);
+  }
+
+  .stage-live {
+    animation: none;
+  }
+
+  /* The plate stops moving entirely: no breath, no camera playback, no
+     develop, no lift. The *appearance* of every plate is unchanged — this
+     removes the motion laid on top of it and nothing else. The blanket rule
+     above would already shrink each animation to a thousandth of a millisecond
+     at its resting keyframe, but these say so outright rather than relying on
+     a side effect, and they strip the transforms and transitions too. */
+  .plate-image,
+  .plate-image[data-breathe="on"],
+  .plate-image[data-cam="on"],
+  .plate[data-phase="develop"] .plate-image {
+    animation: none !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .plate-optic,
+  .plate-arrive {
+    display: none !important;
+  }
+
+  .plate-lift,
+  .plate-lift:hover,
+  .plate-lift:focus-visible,
+  .plate-lift:focus-within {
+    transform: none;
+    box-shadow: var(--shadow-plate);
+  }
+
+  /* A queued or rendering plate still has to *look* unfinished — that is
+     information, not decoration — so the grade stays held back; only the
+     motion goes. */
+  .plate[data-phase="develop"] .plate-image {
+    filter: none !important;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}

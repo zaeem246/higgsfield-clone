@@ -1,18 +1,29 @@
+# --- dependencies ---
 node_modules/
+.venv/
+__pycache__/
+*.py[cod]
+
+# --- build output ---
 .next/
 out/
 build/
 dist/
-
-.env
-.env*.local
-.vercel
+staticfiles/
 *.tsbuildinfo
 next-env.d.ts
-.DS_Store
 
-# Agent capture: the logs themselves ship publicly and are NOT ignored.
-# Only the hook's internal bookkeeping is.
-.agent-logs/.state/
+# --- environment: examples are committed, real values never are ---
+.env
+.env.local
+.env*.local
+!.env.example
 
+# --- tooling ---
 .vercel
+.DS_Store
+skills-lock.json
+.agents/
+
+# --- agent capture: the logs ship publicly; only the hook's bookkeeping is ignored ---
+.agent-logs/.state/
